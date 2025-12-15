@@ -18,7 +18,6 @@ where
     Ok(io::BufReader::new(file).lines())
 }
 
-// TODO: below is not feasible for large ranges, we need to merge the ranges first and then basically get the len of the merged final range.
 fn part_2(lines: Vec<String>) -> u128 {
     let mut count: u128 = 0;
 
