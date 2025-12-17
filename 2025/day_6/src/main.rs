@@ -20,7 +20,55 @@ where
 }
 
 fn part_2(lines: Vec<String>) -> i64 {
+    let mut organized_lines: Vec<Vec<String>> = Vec::new();
+    let mut total_space = 0;
     let mut sum = 0;
+    for line in lines {
+        println!("LINE: {}", line);
+        let trimmed: Vec<_> = line.split(" ").filter(|x| !x.is_empty()).collect();
+
+        for (index, item) in trimmed.iter().enumerate() {
+            if total_space < trimmed.len() {
+                organized_lines.resize(total_space + 1, Vec::new());
+            }
+            organized_lines[index].push(item.to_string());
+            total_space += 1;
+        }
+    }
+
+    let mut placeholder_vec = Vec::new();
+
+    for item in organized_lines {
+        let (nums, op) = item.split_at(item.len() - 1);
+        let length_of_max_number = nums.iter().max_by_key(|x| x.len()).unwrap().len();
+
+        println!("NUMS: {:?}", nums);
+
+        for (count, _) in (0..length_of_max_number).enumerate() {
+            let mut temp = String::from("");
+            for num in nums {
+                let current_digit = num.chars().nth(count);
+
+                if let Some(real_digit) = current_digit {
+                    temp.push(real_digit);
+                };
+            }
+            println!("{}", temp);
+            placeholder_vec.push(temp.parse::<i64>().unwrap());
+        }
+        let op = op.join("");
+        let temp_sum = match op.as_str() {
+            "+" => placeholder_vec.iter().sum(),
+            "*" => placeholder_vec.iter().product(),
+            _ => 0,
+        };
+
+        println!("{}", op);
+        println!("{}", temp_sum);
+        sum += temp_sum;
+        placeholder_vec.drain(..);
+    }
+
     println!("PART 2: {}", sum);
     sum
 }
