@@ -23,12 +23,26 @@ fn part_2(lines: Vec<String>) -> i64 {
     let mut organized_lines: Vec<Vec<String>> = Vec::new();
     let mut total_space = 0;
     let mut sum = 0;
-    for line in lines {
-        println!("LINE: {}", line);
-        let trimmed: Vec<_> = line.split(" ").filter(|x| !x.is_empty()).collect();
 
-        for (index, item) in trimmed.iter().enumerate() {
-            if total_space < trimmed.len() {
+    let op_row = &lines[lines.len() - 1];
+    let col_starts: Vec<usize> = op_row
+        .char_indices()
+        .filter(|(_, c)| *c == '*' || *c == '+')
+        .map(|(i, _)| i)
+        .collect();
+
+    let mut boundaries = col_starts.clone();
+    boundaries.push(op_row.len());
+
+    for line in lines {
+        let mut temp = Vec::new();
+        for window in boundaries.windows(2) {
+            let slice = &line[window[0]..window[1]].trim_end();
+            temp.push(slice.to_string());
+        }
+
+        for (index, item) in temp.iter().enumerate() {
+            if total_space < temp.len() {
                 organized_lines.resize(total_space + 1, Vec::new());
             }
             organized_lines[index].push(item.to_string());
@@ -40,31 +54,29 @@ fn part_2(lines: Vec<String>) -> i64 {
 
     for item in organized_lines {
         let (nums, op) = item.split_at(item.len() - 1);
-        let length_of_max_number = nums.iter().max_by_key(|x| x.len()).unwrap().len();
+        let op: String = op.iter().map(|s| s.trim()).collect();
+        let max_width = nums.iter().map(|n| n.trim().len()).max().unwrap();
 
-        println!("NUMS: {:?}", nums);
-
-        for (count, _) in (0..length_of_max_number).enumerate() {
+        for (count, _) in (0..max_width).enumerate() {
             let mut temp = String::from("");
             for num in nums {
                 let current_digit = num.chars().nth(count);
 
-                if let Some(real_digit) = current_digit {
-                    temp.push(real_digit);
-                };
+                if current_digit.is_some_and(|x| x.is_ascii_digit()) {
+                    temp.push(current_digit.unwrap())
+                }
             }
-            println!("{}", temp);
-            placeholder_vec.push(temp.parse::<i64>().unwrap());
+            if !temp.is_empty() {
+                placeholder_vec.push(temp.parse::<i64>().unwrap());
+            }
         }
-        let op = op.join("");
+
         let temp_sum = match op.as_str() {
             "+" => placeholder_vec.iter().sum(),
             "*" => placeholder_vec.iter().product(),
             _ => 0,
         };
 
-        println!("{}", op);
-        println!("{}", temp_sum);
         sum += temp_sum;
         placeholder_vec.drain(..);
     }
